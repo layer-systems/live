@@ -77,7 +77,7 @@ async function nostrGetStreams() {
         // Create the date placeholder div element with class "card-date"
         const dateDiv = document.createElement("div");
         dateDiv.classList.add("card-date");
-        dateDiv.textContent = formattedCreatedAt;
+        dateDiv.textContent = formattedCreatedAt + " - " + status;
 
         // Append all the elements together to form the structure
         cardBodyDiv.appendChild(senderH5);
