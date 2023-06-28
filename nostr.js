@@ -1,55 +1,48 @@
 const pool = new window.NostrTools.SimplePool();
 let relays = ["wss://relay.damus.io", "wss://relay.nostr.band", "wss://relay.layer.systems"];
 
-nostrGetZaps();
+nostrGetStreams();
 
-async function nostrGetZaps() {
+async function nostrGetStreams() {
     let sub = pool.sub([...relays], [
         {
-            kinds: [9735],
+            kinds: [30311],
             limit: 10,
         }
     ])
     sub.on('event', data => {
-        sats = 0;
+        console.log(data);
 
-        const createdAt = data.created_at;
-        let sender = "not found"
-        let receiver = "not found"
-        let formattedCreatedAt = new Date(createdAt * 1000).toLocaleString();
+        let formattedCreatedAt = new Date(data.created_at * 1000).toLocaleString();
+        let pubkey = data.pubkey;
+        let title = "";
+        let summary = "";
+        let image = "";
+        let streaming = ""; 
+        let status = "";
+        let d = "";
 
         for(let i = 0; i < data.tags.length; i++) {
-            if(data.tags[i][0] == ('p')) {
-                receiver = data.tags[i][1];
+            if(data.tags[i][0] == ('title')) {
+                title = data.tags[i][1];
             }
-            if(data.tags[i][0] == ('description')) {
-                description = JSON.parse(data.tags[i][1]);
-
-                sender = description.pubkey;
+            if(data.tags[i][0] == ('summary')) {
+                summary = data.tags[i][1];
             }
-            if(data.tags[i][0] == ('bolt11')) {
-                bolt11 = data.tags[i][1];
-                // Remove first 4 characters i.e. 'lnbc'
-                let inputStrWithoutPrefix = bolt11.slice(4);
-                // Get the number after 'lnbc'
-                let numberAfterPrefix = parseInt(bolt11.slice(4).match(/\d+/)[0]);
-                // Get the first letter after the number
-                let letterAfterNumber = inputStrWithoutPrefix.charAt(inputStrWithoutPrefix.search(/[a-zA-Z]/));
-                if(letterAfterNumber == 'm') {
-                    sats = Math.round((numberAfterPrefix * 0.001) * 100000000);
-                } else if(letterAfterNumber == 'u') {
-                    sats = Math.round((numberAfterPrefix * 0.000001) * 100000000);
-                } else if(letterAfterNumber == 'n') {
-                    sats = Math.round((numberAfterPrefix * 0.000000001) * 100000000);
-                } else if(letterAfterNumber == 'p') {
-                    sats = Math.round((numberAfterPrefix * 0.000000000001) * 100000000);
-
-                }
+            if(data.tags[i][0] == ('image')) {
+                image = data.tags[i][1];
+            }
+            if(data.tags[i][0] == ('streaming')) {
+                streaming = data.tags[i][1];
+            }
+            if(data.tags[i][0] == ('status')) {
+                status = data.tags[i][1];
+            }
+            if(data.tags[i][0] == ('d')) {
+                d = data.tags[i][1];
             }
         }
 
-        let sendernpub = NostrTools.nip19.npubEncode(sender);
-        let receivernpub = NostrTools.nip19.npubEncode(receiver);
 
         // Create a random div number
         const divNumber = Math.floor(Math.random() * 999999);
@@ -64,8 +57,8 @@ async function nostrGetZaps() {
         // Create the sender placeholder h5 element with class "card-title"
         const senderH5 = document.createElement("h5");
         senderH5.classList.add("card-title");
-        senderH5.textContent = sendernpub;
-        senderH5.id = sender+""+divNumber;
+        senderH5.textContent = pubkey;
+        senderH5.id = pubkey+""+divNumber;
 
         // Create the lightning bolt icon element
         const lightningIcon = document.createElement("i");
@@ -73,14 +66,13 @@ async function nostrGetZaps() {
 
         // Create the p element with the satoshi amount and lightning icon
         const satoshiP = document.createElement("p");
-        satoshiP.textContent = "⚡️ " + sats + " sats";
+        satoshiP.textContent = summary;
         satoshiP.prepend(lightningIcon);
 
         // Create the receiver placeholder h5 element with class "card-title"
         const receiverH5 = document.createElement("h5");
         receiverH5.classList.add("card-title");
-        receiverH5.textContent = receivernpub;
-        receiverH5.id = receiver+""+divNumber;
+        receiverH5.textContent = streaming;
 
         // Create the date placeholder div element with class "card-date"
         const dateDiv = document.createElement("div");
@@ -97,9 +89,9 @@ async function nostrGetZaps() {
         // Insert the card div to the body of the document
         document.getElementById('cards').insertBefore(cardDiv, document.getElementById('cards').firstChild);
 
-        // Get the username of the sender and receiver
-        nostrGetUserinfo(sender, divNumber);
-        nostrGetUserinfo(receiver, divNumber);
+        // Get the username of the sender
+        nostrGetUserinfo(pubkey, divNumber);
+
     })
     sub.on('eose', () => {
         // sub.unsub()
