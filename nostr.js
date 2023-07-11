@@ -41,6 +41,7 @@ async function nostrGetStreams() {
             }
             if(data.tags[i][0] == ('d')) {
                 d = data.tags[i][1];
+                // pubkey = d;
             }
         }
 
