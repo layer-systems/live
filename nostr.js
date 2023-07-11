@@ -58,7 +58,7 @@ async function nostrGetStreams() {
             // Create the sender placeholder h5 element with class "card-title"
             const senderH5 = document.createElement("h5");
             senderH5.classList.add("card-title");
-            senderH5.textContent = pubkey;
+            senderH5.textContent = title + " - " + pubkey;
             senderH5.id = pubkey+""+divNumber;
 
             // Create the lightning bolt icon element
@@ -107,7 +107,7 @@ async function nostrGetStreams() {
             document.getElementById('cards').insertBefore(cardDiv, document.getElementById('cards').firstChild);
 
             // Get the username of the sender
-            nostrGetUserinfo(pubkey, divNumber);
+            nostrGetUserinfo(pubkey, divNumber, title);
         }
 
     })
@@ -116,7 +116,7 @@ async function nostrGetStreams() {
     })
 }
 
-async function nostrGetUserinfo(pubkey, divNumber) {
+async function nostrGetUserinfo(pubkey, divNumber, title) {
     let sub = pool.sub([...relays], [
         {
             kinds: [0],
@@ -132,12 +132,12 @@ async function nostrGetUserinfo(pubkey, divNumber) {
         usernameElement = document.getElementById(pubkey+divNumber);
 
         if (typeof displayName !== "undefined" && displayName !== "") {
-            usernameElement.textContent = `${displayName}`;
+            usernameElement.textContent = `${title} - ${displayName}`;
         } else if (typeof name !== "undefined" && name !== "") {
-            usernameElement.textContent = `${name}`;
+            usernameElement.textContent = `${title} - ${name}`;
         } else {
             if(username !== "undefined" && username !== "") {
-                usernameElement.textContent = `${username}`;
+                usernameElement.textContent = `${title} - ${username}`;
             }
         }
     })
